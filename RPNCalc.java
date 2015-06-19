@@ -1,82 +1,67 @@
-package someProject;
-
 import java.io.IOException;
-import java.util.LinkedList;
+import java.util.EmptyStackException;
 import java.util.NoSuchElementException;
+import java.util.Stack;
 
 public class RPNCalc{
-	public static void evalRPN(String expr){
+	
+	public static double ParseLine(String expr){
 		String cleanExpr = sanitize(expr);
-		LinkedList<Double> stack = new LinkedList<Double>();
-		System.out.println("Input\tOperation\tStack after");
+		Stack<Double> stack = new Stack<Double>();
+		double result = 0;
+		
 		for(String token:cleanExpr.split("\\s")){
-			System.out.print(token+"\t");
 			Double tokenNum = null;
 			try{
 				tokenNum = Double.parseDouble(token);				
 			}
 			catch(NumberFormatException e)
 			{
-				//System.out.println("Error");
+				//System.out.println("E-NumberFormatException");
 			}
 			
-			ParseLineWithSwitch(stack, token, tokenNum);
-			
-			System.out.println(stack);
+			try
+			{
+				ParseTokens(stack, token, tokenNum);
+			}
+			catch(NoSuchElementException e)
+			{
+				//System.out.println("E-NoSuchElementException");
+			}
+			catch(EmptyStackException e)
+			{
+				//System.out.println("E-EmptyStackException");
+			}
 		}
 		
 		try
 		{
-			System.out.println("Final answer: " + stack.pop());
+			result = stack.pop();
+			//System.out.println(result);
 		}
 		catch(NoSuchElementException e)
 		{
-			System.out.println("Error");
+			//System.out.println("E-NoSuchElementException on final pop");
 		}
+		catch(EmptyStackException e)
+		{
+			//System.out.println("E-EmptyStackException on final pop");
+		}
+		
+		return result;
 	}
 
-	@SuppressWarnings("unused")
-	private static void ParseLine(LinkedList<Double> stack, String token,
-			Double tokenNum) {
-		if(tokenNum != null){
-			System.out.print("Push\t\t");
-			stack.push(Double.parseDouble(token+""));
-		}else if(token.equals("*")){
-			System.out.print("Operate\t\t");
-			double secondOperand = stack.pop();
-			double firstOperand = stack.pop();
-			stack.push(firstOperand * secondOperand);
-		}else if(token.equals("/")){
-			System.out.print("Operate\t\t");
-			double secondOperand = stack.pop();
-			double firstOperand = stack.pop();
-			stack.push(firstOperand / secondOperand);
-		}else if(token.equals("-")){
-			System.out.print("Operate\t\t");
-			double secondOperand = stack.pop();
-			double firstOperand = stack.pop();
-			stack.push(firstOperand - secondOperand);
-		}else if(token.equals("+")){
-			System.out.print("Operate\t\t");
-			double secondOperand = stack.pop();
-			double firstOperand = stack.pop();
-			stack.push(firstOperand + secondOperand);
-		}else if(token.equals("^")){
-			System.out.print("Operate\t\t");
-			double secondOperand = stack.pop();
-			double firstOperand = stack.pop();
-			stack.push(Math.pow(firstOperand, secondOperand));
-		}
-	}
-	
-	private static void ParseLineWithSwitch(LinkedList<Double> stack, String token,
-			Double tokenNum) {
+	private static void ParseTokens(Stack<Double> stack, String token, Double tokenNum) {
 		if(tokenNum != null){
 			stack.push(Double.parseDouble(token+""));
 		}else
 		{
 			double secondOperand = stack.pop();
-			double firstOperand = stack.pop();
+			double firstOperand = 0;
+			if((token.charAt(0) != '%')
+					&& (token.charAt(0) != '!'))
+				firstOperand = stack.pop();
+			
 			switch(token.charAt(0))
 			{
 			case '+':
@@ -94,12 +79,34 @@ public class RPNCalc{
 			case '^':
 				stack.push(Math.pow(firstOperand,secondOperand));
 				break;
+			case '%':
+				stack.push(secondOperand/100);
+				break;
+			case '!':
+				stack.push(factorial(secondOperand));
+				break;
 			}
 		}
 	}
  
+	private static Double factorial(double number) {
+		Double d = new Double(1);
+		
+		if(number <= 1)
+		{
+			return d;
+		}
+		
+		for(int n=1; n<=number; n++)
+		{
+			d *= n;
+		}
+		
+		return d;
+	}
+
 	private static String sanitize(String expr){
-		return expr.replaceAll("[^\\^\\*\\+\\-\\d/\\s]", "");
+		return expr.replaceAll("[^\\^\\*\\+\\-\\d/\\s\\%\\!]", "");
 	}
  
 	public static void main(String[] args){
@@ -115,8 +122,10 @@ public class RPNCalc{
 		}
 		catch(IOException e)
 		{
-			//Print Error
+			//System.out.println("E-IOException");
 		}
-		evalRPN(s.toString());
+		double result = ParseLine(s.toString());
+		System.out.println(result);
 	}
 }
+
