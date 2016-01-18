@@ -1,3 +1,6 @@
+dependencies:
+  pre:
+    - javac *.java
 test:
   override:
-    - junit ./RPNCalcTest
+    - junit RPNCalcTest
