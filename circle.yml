@@ -1,5 +1,7 @@
 dependencies:
   pre:
+    - curl -k -L -o junit.jar http://sourceforge.net/projects/junit/files/junit/4.10/junit-4.10.jar/download
+    - tar -jxf junit.jar
     - javac *.java
 test:
   override:
