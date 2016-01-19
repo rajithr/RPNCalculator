@@ -26,7 +26,7 @@ public class RPNCalcTest extends TestCase {
 		testData[numTests++] = new TestData("2 !",2);
 		
 		//Following are UAT ..
-		testData[numTests++] = new TestData("1 2 3 + -",-4);
+		testData[numTests++] = new TestData("1 2 3 + -",-5); //fail here!
 		testData[numTests++] = new TestData("6 2 * 3 /",4);
 		
 		testData[numTests++] = new TestData("2 3 ^ 4 5 + +",17);
